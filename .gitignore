@@ -1,0 +1,26 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.so
+
+# Environment
+.env
+
+# Database
+*.db
+*.sqlite3
+
+# Credentials
+credentials.json
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Local test data
+test_local.db
+parsed_data.json
