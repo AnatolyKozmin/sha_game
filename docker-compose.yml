@@ -12,8 +12,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-sha_project}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
+    # ports:
+    #   - "5433:5432"  # Внешний доступ не нужен
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sha_user} -d ${POSTGRES_DB:-sha_project}"]
       interval: 5s
