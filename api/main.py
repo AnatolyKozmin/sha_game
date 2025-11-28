@@ -20,6 +20,12 @@ from database.models import Base, Command, User
 engine = None
 async_session_maker = None
 
+# Состояние отображения (скрыто/показано)
+display_state = {
+    "hidden": True,  # По умолчанию скрыто
+    "timer_end": None,  # Время окончания таймера
+}
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -93,7 +99,7 @@ async def get_leaderboard(session: AsyncSession = Depends(get_session)):
     for i, item in enumerate(leaderboard):
         item["rank"] = i + 1
     
-    return {"leaderboard": leaderboard}
+    return {"leaderboard": leaderboard, "hidden": display_state["hidden"]}
 
 
 @app.get("/api/users")
@@ -120,8 +126,43 @@ async def get_top_users(limit: int = 10, session: AsyncSession = Depends(get_ses
                 "team_name": u.command.name or f"Команда {u.command.number}",
             }
             for i, u in enumerate(users)
-        ]
+        ],
+        "hidden": display_state["hidden"]
     }
+
+
+@app.get("/api/display-state")
+async def get_display_state():
+    """Получить текущее состояние отображения."""
+    return display_state
+
+
+@app.post("/api/display-state")
+async def set_display_state(hidden: bool = True, timer_minutes: int = 0):
+    """Установить состояние отображения."""
+    import time
+    display_state["hidden"] = hidden
+    if timer_minutes > 0:
+        display_state["timer_end"] = time.time() + (timer_minutes * 60)
+    else:
+        display_state["timer_end"] = None
+    return display_state
+
+
+@app.post("/api/reveal")
+async def reveal_names():
+    """Показать имена."""
+    display_state["hidden"] = False
+    display_state["timer_end"] = None
+    return display_state
+
+
+@app.post("/api/hide")
+async def hide_names():
+    """Скрыть имена."""
+    display_state["hidden"] = True
+    display_state["timer_end"] = None
+    return display_state
 
 
 @app.get("/api/team/{team_id}")
@@ -181,6 +222,15 @@ async def serve_users():
     if file.exists():
         return FileResponse(file)
     return {"error": "users.html not found"}
+
+
+@app.get("/admin")
+async def serve_admin():
+    """Админ-панель."""
+    file = FRONTEND_DIR / "admin.html"
+    if file.exists():
+        return FileResponse(file)
+    return {"error": "admin.html not found"}
 
 
 if __name__ == "__main__":

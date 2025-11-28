@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎛️ Админ-панель</title>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --accent-red: #ff3b3b;
+            --accent-green: #00ff88;
+            --accent-purple: #a855f7;
+            --text-main: #ffffff;
+            --text-dim: #6b7280;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Unbounded', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #app {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .title {
+            font-size: 2rem;
+            margin-bottom: 40px;
+            color: var(--accent-purple);
+        }
+
+        .timer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 5rem;
+            font-weight: 800;
+            margin: 40px 0;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 50px rgba(168, 85, 247, 0.3);
+        }
+
+        .timer.running {
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .status {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            padding: 20px 40px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .status.hidden {
+            background: rgba(255, 59, 59, 0.2);
+            color: var(--accent-red);
+            border: 2px solid var(--accent-red);
+        }
+
+        .status.visible {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--accent-green);
+            border: 2px solid var(--accent-green);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .btn {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-hide {
+            background: linear-gradient(135deg, #ff3b3b, #ff6b6b);
+            color: white;
+        }
+
+        .btn-hide:hover {
+            box-shadow: 0 10px 40px rgba(255, 59, 59, 0.4);
+        }
+
+        .btn-reveal {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #0a0a0f;
+        }
+
+        .btn-reveal:hover {
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-timer {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            color: white;
+        }
+
+        .btn-timer:hover {
+            box-shadow: 0 10px 40px rgba(168, 85, 247, 0.4);
+        }
+
+        .links {
+            margin-top: 60px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .link {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid var(--text-dim);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .link:hover {
+            color: var(--text-main);
+            border-color: var(--text-main);
+        }
+
+        .milliseconds {
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1 class="title">🎛️ Админ-панель</h1>
+
+        <div class="status" :class="{ hidden: isHidden, visible: !isHidden }">
+            {{ isHidden ? '🔒 СКРЫТО' : '👁️ ВИДНО' }}
+        </div>
+
+        <div class="timer" :class="{ running: timerRunning }">
+            {{ timerDisplay }}<span class="milliseconds">.{{ milliseconds }}</span>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-hide" @click="hide">
+                🔒 Скрыть
+            </button>
+            <button class="btn btn-timer" @click="startTimer">
+                ⏱️ Таймер 10 мин
+            </button>
+            <button class="btn btn-reveal" @click="reveal">
+                👁️ Показать
+            </button>
+        </div>
+
+        <div class="links">
+            <a href="/teams" target="_blank" class="link">👥 Команды</a>
+            <a href="/users" target="_blank" class="link">⭐ Участники</a>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+
+        createApp({
+            setup() {
+                const isHidden = ref(true);
+                const timerEnd = ref(null);
+                const currentTime = ref(Date.now());
+                let intervalId = null;
+                let updateId = null;
+
+                const timerRunning = computed(() => {
+                    return timerEnd.value && timerEnd.value > currentTime.value;
+                });
+
+                const remainingMs = computed(() => {
+                    if (!timerEnd.value) return 0;
+                    return Math.max(0, timerEnd.value - currentTime.value);
+                });
+
+                const timerDisplay = computed(() => {
+                    const ms = remainingMs.value;
+                    const totalSeconds = Math.floor(ms / 1000);
+                    const minutes = Math.floor(totalSeconds / 60);
+                    const seconds = totalSeconds % 60;
+                    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                });
+
+                const milliseconds = computed(() => {
+                    const ms = remainingMs.value % 1000;
+                    return String(Math.floor(ms / 10)).padStart(2, '0');
+                });
+
+                const fetchState = async () => {
+                    try {
+                        const res = await fetch('/api/display-state');
+                        const data = await res.json();
+                        isHidden.value = data.hidden;
+                        timerEnd.value = data.timer_end ? data.timer_end * 1000 : null;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                };
+
+                const hide = async () => {
+                    await fetch('/api/hide', { method: 'POST' });
+                    await fetchState();
+                };
+
+                const reveal = async () => {
+                    await fetch('/api/reveal', { method: 'POST' });
+                    await fetchState();
+                };
+
+                const startTimer = async () => {
+                    await fetch('/api/display-state?hidden=true&timer_minutes=10', { method: 'POST' });
+                    await fetchState();
+                };
+
+                onMounted(() => {
+                    fetchState();
+                    intervalId = setInterval(fetchState, 2000);
+                    updateId = setInterval(() => {
+                        currentTime.value = Date.now();
+                    }, 10);
+                });
+
+                onUnmounted(() => {
+                    if (intervalId) clearInterval(intervalId);
+                    if (updateId) clearInterval(updateId);
+                });
+
+                return {
+                    isHidden,
+                    timerRunning,
+                    timerDisplay,
+                    milliseconds,
+                    hide,
+                    reveal,
+                    startTimer,
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+
