@@ -4,31 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⭐ Топ-5 участников</title>
-    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         :root {
-            --bg-dark: #0a0a0f;
-            --bg-card: #12121a;
-            --accent-cyan: #00d4ff;
-            --accent-green: #00ff88;
-            --accent-purple: #a855f7;
-            --text-main: #ffffff;
-            --text-dim: #6b7280;
+            --bg-light: #FEFDFC;
+            --bg-blue: #E6EFFF;
+            --accent-blue: #4A90D9;
+            --accent-blue-dark: #3A7BC8;
+            --accent-blue-light: #7BB3EA;
+            --text-dark: #2C3E50;
+            --text-medium: #5D6D7E;
+            --text-light: #8E99A4;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 8px 32px rgba(74, 144, 217, 0.15);
+            --gold: #F4C542;
+            --silver: #A8B5C4;
+            --bronze: #CD8B62;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Unbounded', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-main);
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-blue) 100%);
             min-height: 100vh;
-            overflow-x: hidden;
+            color: var(--text-dark);
         }
 
-        /* Animated particles */
-        .particles {
+        /* Floating shapes */
+        .shapes {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
@@ -37,35 +42,21 @@
             pointer-events: none;
         }
 
-        .particle {
+        .shape {
             position: absolute;
-            width: 4px; height: 4px;
-            background: var(--accent-cyan);
             border-radius: 50%;
-            opacity: 0.3;
-            animation: floatParticle 15s infinite linear;
+            background: linear-gradient(135deg, rgba(74, 144, 217, 0.1), rgba(74, 144, 217, 0.05));
+            animation: floatShape 20s infinite ease-in-out;
         }
 
-        @keyframes floatParticle {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.3; }
-            90% { opacity: 0.3; }
-            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
-        }
+        .shape:nth-child(1) { width: 300px; height: 300px; top: 10%; left: -5%; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 200px; height: 200px; top: 60%; right: -3%; animation-delay: -5s; }
+        .shape:nth-child(3) { width: 150px; height: 150px; top: 30%; right: 10%; animation-delay: -10s; }
+        .shape:nth-child(4) { width: 100px; height: 100px; bottom: 20%; left: 15%; animation-delay: -15s; }
 
-        .bg-glow {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 800px; height: 800px;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
-            z-index: 0;
-            animation: glowPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes glowPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        @keyframes floatShape {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
         }
 
         #app {
@@ -83,243 +74,245 @@
         .logo {
             font-size: 5rem;
             margin-bottom: 10px;
-            animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.5));
+            animation: bounce 2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(74, 144, 217, 0.3));
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(-5deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
 
         .title {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green), var(--accent-purple));
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--accent-blue);
             text-transform: uppercase;
-            letter-spacing: 6px;
-            animation: gradientShift 3s ease-in-out infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            letter-spacing: 4px;
+            text-shadow: 0 2px 10px rgba(74, 144, 217, 0.2);
         }
 
         .subtitle {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-dim);
-            margin-top: 10px;
-            font-size: 1rem;
+            font-family: 'Nunito', sans-serif;
+            color: var(--text-medium);
+            margin-top: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .live-indicator {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: rgba(0, 212, 255, 0.15);
+            background: white;
             padding: 12px 24px;
-            border-radius: 30px;
+            border-radius: 50px;
             margin-top: 25px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--accent-cyan);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            animation: livePulse 2s ease-in-out infinite;
-        }
-
-        @keyframes livePulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(0, 212, 255, 0); }
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            box-shadow: 0 4px 20px rgba(74, 144, 217, 0.15);
+            border: 2px solid rgba(74, 144, 217, 0.2);
         }
 
         .live-dot {
             width: 10px; height: 10px;
-            background: var(--accent-cyan);
+            background: #4CAF50;
             border-radius: 50%;
-            animation: pulse 1s ease-in-out infinite;
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+            50% { opacity: 0.8; transform: scale(1.2); box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+        }
+
+        .timer-container {
+            margin-top: 30px;
+        }
+
+        .timer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-shadow: 0 4px 20px rgba(74, 144, 217, 0.3);
+        }
+
+        .timer.running {
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .milliseconds {
+            font-size: 1.8rem;
+            opacity: 0.6;
+        }
+
+        .timer-label {
+            font-size: 0.95rem;
+            color: var(--text-medium);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
         }
 
         .leaderboard {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .card {
-            background: linear-gradient(135deg, var(--bg-card), rgba(18, 18, 26, 0.8));
-            border-radius: 24px;
-            padding: 28px 35px;
-            margin-bottom: 20px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
             display: grid;
-            grid-template-columns: 90px 1fr auto;
+            grid-template-columns: 70px 1fr auto;
             align-items: center;
-            gap: 28px;
+            gap: 24px;
             position: relative;
             overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--card-shadow);
+            border: 2px solid rgba(74, 144, 217, 0.1);
             backdrop-filter: blur(10px);
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .card:hover::before {
-            left: 100%;
-        }
-
         .card:hover {
-            transform: translateX(15px) scale(1.02);
-            border-color: rgba(0, 212, 255, 0.4);
-            box-shadow: 0 0 50px rgba(0, 212, 255, 0.2), inset 0 0 30px rgba(0, 212, 255, 0.05);
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 12px 40px rgba(74, 144, 217, 0.25);
+            border-color: rgba(74, 144, 217, 0.3);
         }
 
         .card.rank-1 {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, var(--bg-card) 50%);
-            border-color: rgba(255, 215, 0, 0.4);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+            background: linear-gradient(135deg, rgba(244, 197, 66, 0.15) 0%, var(--card-bg) 50%);
+            border-color: rgba(244, 197, 66, 0.4);
         }
 
         .card.rank-2 {
-            background: linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, var(--bg-card) 50%);
-            border-color: rgba(192, 192, 192, 0.3);
+            background: linear-gradient(135deg, rgba(168, 181, 196, 0.2) 0%, var(--card-bg) 50%);
+            border-color: rgba(168, 181, 196, 0.4);
         }
 
         .card.rank-3 {
-            background: linear-gradient(135deg, rgba(205, 127, 50, 0.15) 0%, var(--bg-card) 50%);
-            border-color: rgba(205, 127, 50, 0.3);
+            background: linear-gradient(135deg, rgba(205, 139, 98, 0.15) 0%, var(--card-bg) 50%);
+            border-color: rgba(205, 139, 98, 0.4);
         }
 
         .rank {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 2.2rem;
-            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
             text-align: center;
+            color: var(--text-medium);
         }
 
-        .rank-1 .rank { color: #ffd700; text-shadow: 0 0 30px rgba(255, 215, 0, 0.8); animation: goldGlow 2s ease-in-out infinite; }
-        .rank-2 .rank { color: #c0c0c0; text-shadow: 0 0 25px rgba(192, 192, 192, 0.7); }
-        .rank-3 .rank { color: #cd7f32; text-shadow: 0 0 25px rgba(205, 127, 50, 0.7); }
+        .rank-1 .rank { color: var(--gold); text-shadow: 0 2px 10px rgba(244, 197, 66, 0.5); }
+        .rank-2 .rank { color: var(--silver); }
+        .rank-3 .rank { color: var(--bronze); }
 
-        @keyframes goldGlow {
-            0%, 100% { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
-            50% { text-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5); }
-        }
+        .rank-badge { font-size: 1.6rem; }
 
-        .rank-badge { font-size: 1.8rem; }
-
-        .info { display: flex; flex-direction: column; gap: 10px; }
+        .info { display: flex; flex-direction: column; gap: 6px; }
 
         .name {
-            font-size: 1.6rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-dark);
         }
 
         .name.hidden-text {
-            color: var(--accent-cyan);
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-            letter-spacing: 4px;
+            color: var(--accent-blue);
+            letter-spacing: 3px;
         }
 
         .meta {
-            font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
-            color: var(--text-dim);
+            color: var(--text-light);
+            font-weight: 600;
         }
 
         .meta.hidden-text {
-            color: var(--accent-purple);
+            color: var(--accent-blue-light);
         }
 
         .score-section { text-align: right; }
 
         .total-score {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 3rem;
+            font-size: 2.4rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+            color: var(--accent-blue);
         }
 
         .score-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
+            font-size: 0.75rem;
+            color: var(--text-light);
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+            font-weight: 600;
         }
 
         .progress-bar {
             position: absolute;
             bottom: 0; left: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green), var(--accent-purple));
-            background-size: 200% 100%;
-            animation: progressGlow 2s linear infinite;
+            background: linear-gradient(90deg, var(--accent-blue-light), var(--accent-blue), var(--accent-blue-dark));
+            border-radius: 0 4px 4px 0;
             transition: width 1s ease;
-        }
-
-        @keyframes progressGlow {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
         }
 
         .loading {
             text-align: center;
             padding: 80px;
-            color: var(--text-dim);
+            color: var(--text-medium);
         }
 
         .loader {
-            width: 80px; height: 80px;
-            border: 5px solid rgba(0, 212, 255, 0.2);
-            border-top-color: var(--accent-cyan);
+            width: 60px; height: 60px;
+            border: 4px solid rgba(74, 144, 217, 0.2);
+            border-top-color: var(--accent-blue);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 25px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .card {
-            animation: slideIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             opacity: 0;
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-80px) scale(0.9); }
-            to { opacity: 1; transform: translateX(0) scale(1); }
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         @media (max-width: 768px) {
-            .title { font-size: 2rem; }
+            .title { font-size: 2rem; letter-spacing: 2px; }
             .logo { font-size: 3.5rem; }
-            .card { grid-template-columns: 70px 1fr; gap: 18px; padding: 22px; }
-            .score-section { grid-column: 1 / -1; text-align: left; display: flex; align-items: center; gap: 20px; }
-            .total-score { font-size: 2.2rem; }
-            .name { font-size: 1.2rem; }
+            .card { grid-template-columns: 55px 1fr; gap: 16px; padding: 18px 20px; }
+            .score-section { grid-column: 1 / -1; text-align: left; display: flex; align-items: center; gap: 15px; }
+            .total-score { font-size: 1.8rem; }
+            .name { font-size: 1.15rem; }
+            .timer { font-size: 2.5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    <div class="bg-glow"></div>
+    <div class="shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
     
     <div id="app">
         <header class="header">
@@ -329,6 +322,13 @@
             <div class="live-indicator">
                 <span class="live-dot"></span>
                 <span>LIVE</span>
+            </div>
+
+            <div v-if="timerRunning" class="timer-container">
+                <div class="timer running">
+                    {{ timerDisplay }}<span class="milliseconds">.{{ milliseconds }}</span>
+                </div>
+                <div class="timer-label">до раскрытия результатов</div>
             </div>
         </header>
 
@@ -343,7 +343,7 @@
                 :key="user.id"
                 class="card"
                 :class="'rank-' + user.rank"
-                :style="{ animationDelay: index * 0.12 + 's' }"
+                :style="{ animationDelay: index * 0.1 + 's' }"
             >
                 <div class="rank">
                     <span v-if="user.rank === 1" class="rank-badge">👑</span>
@@ -372,18 +372,7 @@
     </div>
 
     <script>
-        // Create particles
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 15 + 's';
-            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
-            particlesContainer.appendChild(particle);
-        }
-
-        const { createApp, ref, onMounted, onUnmounted } = Vue;
+        const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
 
         createApp({
             setup() {
@@ -391,7 +380,32 @@
                 const loading = ref(true);
                 const maxScore = ref(1);
                 const isHidden = ref(true);
+                const timerEnd = ref(null);
+                const currentTime = ref(Date.now());
                 let intervalId = null;
+                let timerUpdateId = null;
+
+                const timerRunning = computed(() => {
+                    return timerEnd.value && timerEnd.value > currentTime.value;
+                });
+
+                const remainingMs = computed(() => {
+                    if (!timerEnd.value) return 0;
+                    return Math.max(0, timerEnd.value - currentTime.value);
+                });
+
+                const timerDisplay = computed(() => {
+                    const ms = remainingMs.value;
+                    const totalSeconds = Math.floor(ms / 1000);
+                    const minutes = Math.floor(totalSeconds / 60);
+                    const seconds = totalSeconds % 60;
+                    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                });
+
+                const milliseconds = computed(() => {
+                    const ms = remainingMs.value % 1000;
+                    return String(Math.floor(ms / 10)).padStart(2, '0');
+                });
 
                 const fetchData = async () => {
                     try {
@@ -401,6 +415,10 @@
                         maxScore.value = Math.max(...users.value.map(u => u.score), 1);
                         isHidden.value = data.hidden;
                         loading.value = false;
+
+                        const stateRes = await fetch('/api/display-state');
+                        const stateData = await stateRes.json();
+                        timerEnd.value = stateData.timer_end ? stateData.timer_end * 1000 : null;
                     } catch (e) {
                         console.error(e);
                         loading.value = false;
@@ -412,11 +430,17 @@
                 onMounted(() => {
                     fetchData();
                     intervalId = setInterval(fetchData, 3000);
+                    timerUpdateId = setInterval(() => {
+                        currentTime.value = Date.now();
+                    }, 10);
                 });
 
-                onUnmounted(() => { if (intervalId) clearInterval(intervalId); });
+                onUnmounted(() => {
+                    if (intervalId) clearInterval(intervalId);
+                    if (timerUpdateId) clearInterval(timerUpdateId);
+                });
 
-                return { users, loading, getProgress, isHidden };
+                return { users, loading, getProgress, isHidden, timerRunning, timerDisplay, milliseconds };
             }
         }).mount('#app');
     </script>

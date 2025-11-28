@@ -4,51 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎛️ Админ-панель</title>
-    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         :root {
-            --bg-dark: #0a0a0f;
-            --bg-card: #12121a;
-            --accent-red: #ff3b3b;
-            --accent-green: #00ff88;
-            --accent-purple: #a855f7;
-            --text-main: #ffffff;
-            --text-dim: #6b7280;
+            --bg-light: #FEFDFC;
+            --bg-blue: #E6EFFF;
+            --accent-blue: #4A90D9;
+            --accent-red: #E74C3C;
+            --accent-green: #27AE60;
+            --text-dark: #2C3E50;
+            --text-medium: #5D6D7E;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Unbounded', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-main);
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-blue) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--text-dark);
         }
 
         #app {
             text-align: center;
             padding: 40px;
+            max-width: 600px;
         }
 
         .title {
             font-size: 2rem;
+            font-weight: 900;
             margin-bottom: 40px;
-            color: var(--accent-purple);
+            color: var(--accent-blue);
         }
 
         .timer {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 5rem;
+            font-size: 4.5rem;
             font-weight: 800;
             margin: 40px 0;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-red));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 50px rgba(168, 85, 247, 0.3);
+            color: var(--accent-blue);
+            text-shadow: 0 4px 20px rgba(74, 144, 217, 0.3);
         }
 
         .timer.running {
@@ -60,8 +60,14 @@
             50% { transform: scale(1.02); }
         }
 
+        .milliseconds {
+            font-size: 2rem;
+            opacity: 0.6;
+        }
+
         .status {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 800;
             margin-bottom: 30px;
             padding: 20px 40px;
             border-radius: 20px;
@@ -69,41 +75,41 @@
         }
 
         .status.hidden {
-            background: rgba(255, 59, 59, 0.2);
+            background: rgba(231, 76, 60, 0.15);
             color: var(--accent-red);
             border: 2px solid var(--accent-red);
         }
 
         .status.visible {
-            background: rgba(0, 255, 136, 0.2);
+            background: rgba(39, 174, 96, 0.15);
             color: var(--accent-green);
             border: 2px solid var(--accent-green);
         }
 
         .buttons {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
             margin-top: 40px;
         }
 
         .btn {
-            font-family: 'Unbounded', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 600;
-            padding: 20px 40px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 800;
+            padding: 18px 36px;
             border: none;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
         .btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .btn:active {
@@ -111,57 +117,43 @@
         }
 
         .btn-hide {
-            background: linear-gradient(135deg, #ff3b3b, #ff6b6b);
+            background: var(--accent-red);
             color: white;
-        }
-
-        .btn-hide:hover {
-            box-shadow: 0 10px 40px rgba(255, 59, 59, 0.4);
         }
 
         .btn-reveal {
-            background: linear-gradient(135deg, #00ff88, #00cc6a);
-            color: #0a0a0f;
-        }
-
-        .btn-reveal:hover {
-            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
-        }
-
-        .btn-timer {
-            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            background: var(--accent-green);
             color: white;
         }
 
-        .btn-timer:hover {
-            box-shadow: 0 10px 40px rgba(168, 85, 247, 0.4);
+        .btn-timer {
+            background: var(--accent-blue);
+            color: white;
         }
 
         .links {
-            margin-top: 60px;
+            margin-top: 50px;
             display: flex;
-            gap: 20px;
+            gap: 16px;
             justify-content: center;
         }
 
         .link {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-dim);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            color: var(--text-medium);
             text-decoration: none;
-            padding: 10px 20px;
-            border: 1px solid var(--text-dim);
-            border-radius: 10px;
+            padding: 12px 24px;
+            border: 2px solid rgba(74, 144, 217, 0.3);
+            border-radius: 12px;
             transition: all 0.3s ease;
+            background: white;
         }
 
         .link:hover {
-            color: var(--text-main);
-            border-color: var(--text-main);
-        }
-
-        .milliseconds {
-            font-size: 2rem;
-            opacity: 0.7;
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            box-shadow: 0 4px 15px rgba(74, 144, 217, 0.2);
         }
     </style>
 </head>
@@ -281,4 +273,3 @@
     </script>
 </body>
 </html>
-
