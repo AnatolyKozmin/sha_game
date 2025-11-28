@@ -200,6 +200,11 @@ async def get_team_details(team_id: int, session: AsyncSession = Depends(get_ses
 
 # Serve frontend
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+FONTS_DIR = FRONTEND_DIR / "fonts"
+
+# Serve fonts
+if FONTS_DIR.exists():
+    app.mount("/fonts", StaticFiles(directory=FONTS_DIR), name="fonts")
 
 @app.get("/")
 async def serve_index():
