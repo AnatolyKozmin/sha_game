@@ -14,7 +14,7 @@ from scripts.import_to_db import import_commands_to_db
 
 router = Router(name="parsing")
 
-# Фильтр только для проверяющих
+# Оставляем фильтр для парсинга - только проверяющие
 router.message.filter(CheckerFilter())
 
 

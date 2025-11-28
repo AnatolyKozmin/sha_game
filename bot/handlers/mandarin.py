@@ -27,9 +27,7 @@ def sync_to_google_sheets(func):
 
 router = Router(name="mandarin")
 
-# Применяем фильтр проверяющих ко всему роутеру
-router.message.filter(CheckerFilter())
-router.callback_query.filter(CheckerFilter())
+# Фильтр убран - доступ для всех
 
 
 @router.message(Command("mandarin"))
