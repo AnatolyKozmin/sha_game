@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍊 Топ-10 команд</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --accent-orange: #ff6b2c;
+            --accent-yellow: #ffd93d;
+            --accent-pink: #ff2e63;
+            --text-main: #ffffff;
+            --text-dim: #6b7280;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Unbounded', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            opacity: 0.03;
+            background-image: 
+                linear-gradient(30deg, var(--accent-orange) 12%, transparent 12.5%, transparent 87%, var(--accent-orange) 87.5%),
+                linear-gradient(150deg, var(--accent-orange) 12%, transparent 12.5%, transparent 87%, var(--accent-orange) 87.5%);
+            background-size: 80px 140px;
+        }
+
+        #app {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 107, 44, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+        }
+
+        .live-dot {
+            width: 8px; height: 8px;
+            background: var(--accent-orange);
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .leaderboard {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px 30px;
+            margin-bottom: 16px;
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            align-items: center;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 1px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateX(10px);
+            border-color: rgba(255, 107, 44, 0.3);
+            box-shadow: 0 0 30px rgba(255, 107, 44, 0.2);
+        }
+
+        .card.rank-1 { background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, var(--bg-card) 50%); border-color: rgba(255, 215, 0, 0.3); }
+        .card.rank-2 { background: linear-gradient(135deg, rgba(192, 192, 192, 0.1) 0%, var(--bg-card) 50%); border-color: rgba(192, 192, 192, 0.2); }
+        .card.rank-3 { background: linear-gradient(135deg, rgba(205, 127, 50, 0.1) 0%, var(--bg-card) 50%); border-color: rgba(205, 127, 50, 0.2); }
+
+        .rank {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .rank-1 .rank { color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+        .rank-2 .rank { color: #c0c0c0; text-shadow: 0 0 20px rgba(192, 192, 192, 0.6); }
+        .rank-3 .rank { color: #cd7f32; text-shadow: 0 0 20px rgba(205, 127, 50, 0.6); }
+
+        .rank-badge { font-size: 1.5rem; }
+
+        .info { display: flex; flex-direction: column; gap: 8px; }
+        .name { font-size: 1.4rem; font-weight: 600; }
+        .meta {
+            display: flex; gap: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .score-section { text-align: right; }
+        .total-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .score-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-yellow));
+            transition: width 0.8s ease;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-dim);
+        }
+
+        .loader {
+            width: 60px; height: 60px;
+            border: 4px solid rgba(255, 107, 44, 0.2);
+            border-top-color: var(--accent-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .card {
+            animation: slideIn 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 1.8rem; }
+            .logo { font-size: 3rem; }
+            .card { grid-template-columns: 60px 1fr; gap: 16px; padding: 20px; }
+            .score-section { grid-column: 1 / -1; text-align: left; display: flex; align-items: center; gap: 16px; }
+            .total-score { font-size: 2rem; }
+            .name { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <div id="app">
+        <header class="header">
+            <div class="logo">👥</div>
+            <h1 class="title">Топ-10 команд</h1>
+            <p class="subtitle">Школа Актива 2025</p>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span>LIVE</span>
+            </div>
+        </header>
+
+        <div class="leaderboard">
+            <div v-if="loading" class="loading">
+                <div class="loader"></div>
+                <p>Загрузка...</p>
+            </div>
+
+            <div 
+                v-for="(team, index) in teams" 
+                :key="team.id"
+                class="card"
+                :class="'rank-' + team.rank"
+                :style="{ animationDelay: index * 0.1 + 's' }"
+            >
+                <div class="rank">
+                    <span v-if="team.rank === 1" class="rank-badge">👑</span>
+                    <span v-else-if="team.rank === 2" class="rank-badge">🥈</span>
+                    <span v-else-if="team.rank === 3" class="rank-badge">🥉</span>
+                    <span v-else>#{{ team.rank }}</span>
+                </div>
+                
+                <div class="info">
+                    <div class="name">{{ team.name }}</div>
+                    <div class="meta">
+                        <span>👥 {{ team.members_count }} участников</span>
+                    </div>
+                </div>
+                
+                <div class="score-section">
+                    <div class="total-score">{{ team.total_score }}</div>
+                    <div class="score-label">баллов</div>
+                </div>
+                
+                <div class="progress-bar" :style="{ width: getProgress(team) }"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, onUnmounted } = Vue;
+
+        createApp({
+            setup() {
+                const teams = ref([]);
+                const loading = ref(true);
+                const maxScore = ref(1);
+                let intervalId = null;
+
+                const fetchData = async () => {
+                    try {
+                        const res = await fetch('/api/leaderboard');
+                        const data = await res.json();
+                        teams.value = data.leaderboard.slice(0, 10);
+                        maxScore.value = Math.max(...teams.value.map(t => t.total_score), 1);
+                        loading.value = false;
+                    } catch (e) {
+                        console.error(e);
+                        loading.value = false;
+                    }
+                };
+
+                const getProgress = (team) => (team.total_score / maxScore.value) * 100 + '%';
+
+                onMounted(() => {
+                    fetchData();
+                    intervalId = setInterval(fetchData, 10000);
+                });
+
+                onUnmounted(() => { if (intervalId) clearInterval(intervalId); });
+
+                return { teams, loading, getProgress };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+

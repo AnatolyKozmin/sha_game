@@ -96,6 +96,34 @@ async def get_leaderboard(session: AsyncSession = Depends(get_session)):
     return {"leaderboard": leaderboard}
 
 
+@app.get("/api/users")
+async def get_top_users(limit: int = 10, session: AsyncSession = Depends(get_session)):
+    """Топ участников по баллам."""
+    from sqlalchemy import desc
+    
+    result = await session.execute(
+        select(User)
+        .options(selectinload(User.command))
+        .order_by(desc(User.score))
+        .limit(limit)
+    )
+    users = result.scalars().all()
+    
+    return {
+        "users": [
+            {
+                "rank": i + 1,
+                "id": u.id,
+                "name": u.full_name,
+                "score": u.score,
+                "team_number": u.command.number,
+                "team_name": u.command.name or f"Команда {u.command.number}",
+            }
+            for i, u in enumerate(users)
+        ]
+    }
+
+
 @app.get("/api/team/{team_id}")
 async def get_team_details(team_id: int, session: AsyncSession = Depends(get_session)):
     """Детали команды с участниками."""
@@ -133,12 +161,26 @@ async def get_team_details(team_id: int, session: AsyncSession = Depends(get_ses
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
 @app.get("/")
-async def serve_frontend():
-    """Serve main page."""
-    index_file = FRONTEND_DIR / "index.html"
-    if index_file.exists():
-        return FileResponse(index_file)
-    return {"message": "Frontend not found. Place index.html in /frontend/"}
+async def serve_index():
+    """Главная страница - редирект на команды."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/teams")
+
+@app.get("/teams")
+async def serve_teams():
+    """Страница топ-10 команд."""
+    file = FRONTEND_DIR / "teams.html"
+    if file.exists():
+        return FileResponse(file)
+    return {"error": "teams.html not found"}
+
+@app.get("/users")
+async def serve_users():
+    """Страница топ-5 участников."""
+    file = FRONTEND_DIR / "users.html"
+    if file.exists():
+        return FileResponse(file)
+    return {"error": "users.html not found"}
 
 
 if __name__ == "__main__":
