@@ -94,21 +94,32 @@
         }
 
         .subtitle .shkola {
-            background: linear-gradient(135deg, #2456D3, #A54CEB);
+            background: linear-gradient(90deg, #15B925, #79E742, #15B925, #79E742);
+            background-size: 300% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
         }
 
         .subtitle .aktiva {
-            background: linear-gradient(135deg, #DA5CF3, #FFF29F);
+            background: linear-gradient(90deg, #2456D3, #569AF8, #2456D3, #569AF8);
+            background-size: 300% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+            animation-delay: 0.5s;
         }
 
         .subtitle .year {
             color: #A54CEB;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .timer-container {
