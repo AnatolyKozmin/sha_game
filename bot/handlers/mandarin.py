@@ -223,16 +223,17 @@ async def callback_toggle_user_task(callback: CallbackQuery, session: AsyncSessi
     if task.is_completed:
         user.score += 1
         await callback.answer("✅ Задание выполнено! +1 балл участнику")
+        
+        # Записываем время достижения 10 личных баллов
+        if user.score == MAX_PERSONAL_SCORE and user.max_reached_at is None:
+            user.max_reached_at = datetime.utcnow()
+            logger.info(f"User {user.id} reached max personal score at {user.max_reached_at}")
     else:
         user.score -= 1
-        user.max_reached_at = None  # Сбрасываем при отмене
+        # Сбрасываем время если упали ниже максимума
+        if user.score < MAX_PERSONAL_SCORE:
+            user.max_reached_at = None
         await callback.answer("❌ Задание отменено. -1 балл участнику")
-    
-    # Проверяем достижение максимума
-    if user.score == MAX_PERSONAL_SCORE and command.score == MAX_TEAM_SCORE:
-        if user.max_reached_at is None:
-            user.max_reached_at = datetime.utcnow()
-            logger.info(f"User {user.id} reached maximum at {user.max_reached_at}")
     
     await session.commit()
     
@@ -305,17 +306,7 @@ async def callback_toggle_command_task(callback: CallbackQuery, session: AsyncSe
         await callback.answer("✅ Командное задание выполнено! +3 балла команде")
     else:
         command.score -= 3
-        # Сбрасываем max_reached_at для всех участников при отмене командного задания
-        for user in command.users:
-            user.max_reached_at = None
         await callback.answer("❌ Командное задание отменено. -3 балла команде")
-    
-    # Проверяем достижение максимума для всех участников команды
-    if command.score == MAX_TEAM_SCORE:
-        for user in command.users:
-            if user.score == MAX_PERSONAL_SCORE and user.max_reached_at is None:
-                user.max_reached_at = datetime.utcnow()
-                logger.info(f"User {user.id} reached maximum at {user.max_reached_at}")
     
     await session.commit()
     
