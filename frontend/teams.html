@@ -93,7 +93,22 @@
             gap: 12px;
         }
 
-        .subtitle .shkola {
+        .subtitle .shkola,
+        .subtitle .aktiva {
+            display: inline-flex;
+        }
+
+        .subtitle .first-letter {
+            font-family: 'FirstFont', cursive;
+            font-size: 2.2rem;
+        }
+
+        .subtitle .rest-letters {
+            font-family: 'SecondFont', cursive;
+        }
+
+        .subtitle .shkola .first-letter,
+        .subtitle .shkola .rest-letters {
             background: linear-gradient(90deg, #15B925, #79E742, #15B925, #79E742);
             background-size: 300% 100%;
             -webkit-background-clip: text;
@@ -102,7 +117,8 @@
             animation: gradientShift 3s ease-in-out infinite;
         }
 
-        .subtitle .aktiva {
+        .subtitle .aktiva .first-letter,
+        .subtitle .aktiva .rest-letters {
             background: linear-gradient(90deg, #2456D3, #569AF8, #2456D3, #569AF8);
             background-size: 300% 100%;
             -webkit-background-clip: text;
@@ -303,7 +319,7 @@
     <div id="app">
         <header class="header">
             <h1 class="title"><span class="accent">Т</span>оп <span class="accent">К</span>оманд</h1>
-            <p class="subtitle"><span class="shkola">Школа</span> <span class="aktiva">Актива</span> <span class="year">2025</span></p>
+            <p class="subtitle"><span class="shkola"><span class="first-letter">Ш</span><span class="rest-letters">кола</span></span> <span class="aktiva"><span class="first-letter">А</span><span class="rest-letters">ктива</span></span> <span class="year">2025</span></p>
 
             <div v-if="timerRunning" class="timer-container">
                 <div class="timer running">
