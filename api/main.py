@@ -164,6 +164,38 @@ async def get_top_users(limit: int = 10, session: AsyncSession = Depends(get_ses
     }
 
 
+@app.get("/api/stats")
+async def get_stats(session: AsyncSession = Depends(get_session)):
+    """Статистика по командам."""
+    result = await session.execute(
+        select(Command)
+        .options(selectinload(Command.users))
+        .order_by(Command.number)
+    )
+    commands = result.scalars().all()
+    
+    stats = []
+    for cmd in commands:
+        users_data = [
+            {
+                "name": u.full_name,
+                "score": u.score,
+            }
+            for u in sorted(cmd.users, key=lambda x: x.score, reverse=True)
+        ]
+        
+        stats.append({
+            "number": cmd.number,
+            "name": cmd.name or f"Команда {cmd.number}",
+            "team_score": cmd.score,
+            "users_score": sum(u.score for u in cmd.users),
+            "total_score": cmd.total_score,
+            "users": users_data,
+        })
+    
+    return {"stats": stats}
+
+
 @app.get("/api/display-state")
 async def get_display_state():
     """Получить текущее состояние отображения."""
@@ -269,6 +301,15 @@ async def serve_admin():
     if file.exists():
         return FileResponse(file)
     return {"error": "admin.html not found"}
+
+
+@app.get("/stats")
+async def serve_stats():
+    """Страница статистики."""
+    file = FRONTEND_DIR / "stats.html"
+    if file.exists():
+        return FileResponse(file)
+    return {"error": "stats.html not found"}
 
 
 if __name__ == "__main__":
