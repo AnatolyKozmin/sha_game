@@ -96,3 +96,49 @@ def get_command_tasks_keyboard(command: Command, tasks: list[CommandTask]) -> In
     
     return builder.as_markup()
 
+
+# ===== Клавиатуры для /masha =====
+
+def get_masha_commands_keyboard(commands: list[Command]) -> InlineKeyboardMarkup:
+    """Клавиатура со списком команд и их общими баллами."""
+    builder = InlineKeyboardBuilder()
+    
+    # Сортируем по total_score
+    sorted_commands = sorted(commands, key=lambda c: c.total_score, reverse=True)
+    
+    for i, cmd in enumerate(sorted_commands):
+        name = cmd.name or f"Команда {cmd.number}"
+        medal = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else "👥"
+        builder.button(
+            text=f"{medal} {name}: {cmd.total_score} баллов",
+            callback_data=f"masha_cmd:{cmd.id}"
+        )
+    
+    builder.adjust(1)  # 1 кнопка в ряд
+    return builder.as_markup()
+
+
+def get_masha_team_details_keyboard(command: Command, users: list[User]) -> InlineKeyboardMarkup:
+    """Клавиатура с баллами участников команды (только просмотр)."""
+    builder = InlineKeyboardBuilder()
+    
+    # Сортируем участников по баллам
+    sorted_users = sorted(users, key=lambda u: u.score, reverse=True)
+    
+    for user in sorted_users:
+        builder.button(
+            text=f"👤 {user.full_name}: {user.score} баллов",
+            callback_data=f"masha_user_info:{user.id}"  # Просто показывает alert
+        )
+    
+    # Кнопка назад
+    builder.row(
+        InlineKeyboardButton(
+            text="⬅️ Назад к командам",
+            callback_data="masha_back:commands"
+        )
+    )
+    
+    builder.adjust(1)
+    return builder.as_markup()
+

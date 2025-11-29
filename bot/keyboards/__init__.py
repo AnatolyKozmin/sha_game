@@ -4,6 +4,8 @@ from bot.keyboards.inline import (
     get_team_members_keyboard,
     get_user_tasks_keyboard,
     get_command_tasks_keyboard,
+    get_masha_commands_keyboard,
+    get_masha_team_details_keyboard,
 )
 
 __all__ = [
@@ -11,5 +13,7 @@ __all__ = [
     "get_team_members_keyboard", 
     "get_user_tasks_keyboard",
     "get_command_tasks_keyboard",
+    "get_masha_commands_keyboard",
+    "get_masha_team_details_keyboard",
 ]
 

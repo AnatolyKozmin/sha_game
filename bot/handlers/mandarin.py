@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
@@ -7,12 +8,17 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import Command as CommandModel, User, UserTask, CommandTask
+
+MAX_PERSONAL_SCORE = 10  # Максимум личных баллов
+MAX_TEAM_SCORE = 21      # Максимум командных баллов (7 заданий × 3)
 from bot.filters import CheckerFilter
 from bot.keyboards import (
     get_commands_keyboard,
     get_team_members_keyboard,
     get_user_tasks_keyboard,
     get_command_tasks_keyboard,
+    get_masha_commands_keyboard,
+    get_masha_team_details_keyboard,
 )
 
 logger = logging.getLogger(__name__)
@@ -213,15 +219,20 @@ async def callback_toggle_user_task(callback: CallbackQuery, session: AsyncSessi
     # Переключаем статус
     task.is_completed = not task.is_completed
     
-    # Обновляем баллы
+    # Обновляем баллы (только личные, командные не трогаем)
     if task.is_completed:
         user.score += 1
-        command.score += 1
-        await callback.answer("✅ Задание выполнено! +1 балл участнику, +1 команде")
+        await callback.answer("✅ Задание выполнено! +1 балл участнику")
     else:
         user.score -= 1
-        command.score -= 1
-        await callback.answer("❌ Задание отменено. -1 балл участнику, -1 команде")
+        user.max_reached_at = None  # Сбрасываем при отмене
+        await callback.answer("❌ Задание отменено. -1 балл участнику")
+    
+    # Проверяем достижение максимума
+    if user.score == MAX_PERSONAL_SCORE and command.score == MAX_TEAM_SCORE:
+        if user.max_reached_at is None:
+            user.max_reached_at = datetime.utcnow()
+            logger.info(f"User {user.id} reached maximum at {user.max_reached_at}")
     
     await session.commit()
     
@@ -271,7 +282,10 @@ async def callback_toggle_command_task(callback: CallbackQuery, session: AsyncSe
     
     result = await session.execute(
         select(CommandTask)
-        .options(selectinload(CommandTask.command).selectinload(CommandModel.tasks))
+        .options(
+            selectinload(CommandTask.command).selectinload(CommandModel.tasks),
+            selectinload(CommandTask.command).selectinload(CommandModel.users)
+        )
         .where(CommandTask.id == task_id)
     )
     task = result.scalar_one_or_none()
@@ -291,7 +305,17 @@ async def callback_toggle_command_task(callback: CallbackQuery, session: AsyncSe
         await callback.answer("✅ Командное задание выполнено! +3 балла команде")
     else:
         command.score -= 3
+        # Сбрасываем max_reached_at для всех участников при отмене командного задания
+        for user in command.users:
+            user.max_reached_at = None
         await callback.answer("❌ Командное задание отменено. -3 балла команде")
+    
+    # Проверяем достижение максимума для всех участников команды
+    if command.score == MAX_TEAM_SCORE:
+        for user in command.users:
+            if user.score == MAX_PERSONAL_SCORE and user.max_reached_at is None:
+                user.max_reached_at = datetime.utcnow()
+                logger.info(f"User {user.id} reached maximum at {user.max_reached_at}")
     
     await session.commit()
     
@@ -331,4 +355,123 @@ async def callback_toggle_command_task(callback: CallbackQuery, session: AsyncSe
         text,
         reply_markup=get_command_tasks_keyboard(command, command.tasks),
         parse_mode="HTML"
+    )
+
+
+# ===== Команда /masha - просмотр баллов команд и участников =====
+
+@router.message(Command("masha"))
+async def cmd_masha(message: Message, session: AsyncSession):
+    """Команда /masha - показать рейтинг команд с общими баллами."""
+    result = await session.execute(
+        select(CommandModel)
+        .options(selectinload(CommandModel.users))
+        .order_by(CommandModel.number)
+    )
+    commands = result.scalars().all()
+    
+    if not commands:
+        await message.answer("📭 Команды ещё не добавлены.")
+        return
+    
+    # Считаем общие баллы для текста
+    total_all = sum(cmd.total_score for cmd in commands)
+    
+    await message.answer(
+        f"🏆 <b>Рейтинг команд</b>\n\n"
+        f"📊 Всего баллов: {total_all}\n\n"
+        f"Выбери команду для просмотра участников:",
+        reply_markup=get_masha_commands_keyboard(commands),
+        parse_mode="HTML"
+    )
+
+
+@router.callback_query(F.data == "masha_back:commands")
+async def callback_masha_back_to_commands(callback: CallbackQuery, session: AsyncSession):
+    """Возврат к списку команд в /masha."""
+    result = await session.execute(
+        select(CommandModel)
+        .options(selectinload(CommandModel.users))
+        .order_by(CommandModel.number)
+    )
+    commands = result.scalars().all()
+    
+    total_all = sum(cmd.total_score for cmd in commands)
+    
+    await callback.message.edit_text(
+        f"🏆 <b>Рейтинг команд</b>\n\n"
+        f"📊 Всего баллов: {total_all}\n\n"
+        f"Выбери команду для просмотра участников:",
+        reply_markup=get_masha_commands_keyboard(commands),
+        parse_mode="HTML"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("masha_cmd:"))
+async def callback_masha_select_command(callback: CallbackQuery, session: AsyncSession):
+    """Выбор команды в /masha - показать участников с баллами."""
+    command_id = int(callback.data.split(":")[1])
+    
+    result = await session.execute(
+        select(CommandModel)
+        .options(selectinload(CommandModel.users))
+        .where(CommandModel.id == command_id)
+    )
+    command = result.scalar_one_or_none()
+    
+    if not command:
+        await callback.answer("❌ Команда не найдена", show_alert=True)
+        return
+    
+    name = command.name or f"Команда {command.number}"
+    users_score = sum(u.score for u in command.users)
+    
+    # Формируем текст с участниками
+    sorted_users = sorted(command.users, key=lambda u: u.score, reverse=True)
+    users_text = ""
+    for i, user in enumerate(sorted_users):
+        medal = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else f"{i+1}."
+        users_text += f"\n{medal} {user.full_name}: <b>{user.score}</b> баллов"
+    
+    text = (
+        f"👥 <b>{name}</b>\n\n"
+        f"⭐ Командные баллы: {command.score}\n"
+        f"👤 Баллы участников: {users_score}\n"
+        f"📊 <b>Всего: {command.total_score}</b>\n\n"
+        f"<b>Участники:</b>{users_text}"
+    )
+    
+    await callback.message.edit_text(
+        text,
+        reply_markup=get_masha_team_details_keyboard(command, command.users),
+        parse_mode="HTML"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("masha_user_info:"))
+async def callback_masha_user_info(callback: CallbackQuery, session: AsyncSession):
+    """Показать информацию об участнике (alert)."""
+    user_id = int(callback.data.split(":")[1])
+    
+    result = await session.execute(
+        select(User)
+        .options(selectinload(User.tasks), selectinload(User.command))
+        .where(User.id == user_id)
+    )
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        await callback.answer("❌ Участник не найден", show_alert=True)
+        return
+    
+    completed = sum(1 for t in user.tasks if t.is_completed)
+    total = len(user.tasks)
+    
+    await callback.answer(
+        f"👤 {user.full_name}\n"
+        f"⭐ Баллы: {user.score}\n"
+        f"📋 Заданий: {completed}/{total}",
+        show_alert=True
     )

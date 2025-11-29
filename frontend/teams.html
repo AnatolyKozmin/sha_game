@@ -54,8 +54,8 @@
             z-index: 0;
             pointer-events: none;
             background-image: 
-                linear-gradient(rgba(74, 144, 217, 0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(74, 144, 217, 0.06) 1px, transparent 1px);
+                linear-gradient(rgba(74, 144, 217, 0.12) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 144, 217, 0.12) 1px, transparent 1px);
             background-size: 240px 240px;
         }
 
@@ -88,11 +88,11 @@
                 #569AF8,
                 #2456D3
             );
-            background-size: 400% 100%;
+            background-size: 1000% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: rainbowShift 60s linear infinite;
+            animation: rainbowShift 120s linear infinite;
         }
 
         .title .accent {
@@ -102,7 +102,7 @@
 
         @keyframes rainbowShift {
             0% { background-position: 0% 50%; }
-            100% { background-position: 400% 50%; }
+            100% { background-position: 1000% 50%; }
         }
 
         .subtitle {

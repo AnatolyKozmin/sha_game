@@ -104,16 +104,49 @@ async def get_leaderboard(session: AsyncSession = Depends(get_session)):
 
 @app.get("/api/users")
 async def get_top_users(limit: int = 10, session: AsyncSession = Depends(get_session)):
-    """Топ участников по баллам."""
-    from sqlalchemy import desc
+    """
+    Топ участников по личным баллам.
     
+    Логика сортировки:
+    1. По личным баллам — убывание
+    2. Если личные равны И оба = 10 (максимум), по баллам команды — убывание
+    3. Если и командные равны, кто раньше набрал максимум — выше
+    """
+    # Загружаем пользователей с командами
     result = await session.execute(
         select(User)
         .options(selectinload(User.command))
-        .order_by(desc(User.score))
-        .limit(limit)
     )
     users = result.scalars().all()
+    
+    MAX_PERSONAL = 10  # Максимум личных баллов
+    
+    def sort_key(user: User):
+        personal = user.score
+        team_score = user.command.score
+        
+        # Приоритет 1: личные баллы (убывание)
+        priority1 = -personal
+        
+        # Приоритет 2: если личные = 10, то по командным баллам (убывание)
+        if personal == MAX_PERSONAL:
+            priority2 = -team_score
+        else:
+            priority2 = 0
+        
+        # Приоритет 3: если личные = 10 и равные командные, по времени достижения
+        if personal == MAX_PERSONAL:
+            if user.max_reached_at:
+                priority3 = user.max_reached_at.timestamp()
+            else:
+                priority3 = float('inf')  # Если не записано — в конец
+        else:
+            priority3 = 0
+        
+        return (priority1, priority2, priority3)
+    
+    # Сортируем
+    sorted_users = sorted(users, key=sort_key)[:limit]
     
     return {
         "users": [
@@ -125,7 +158,7 @@ async def get_top_users(limit: int = 10, session: AsyncSession = Depends(get_ses
                 "team_number": u.command.number,
                 "team_name": u.command.name or f"Команда {u.command.number}",
             }
-            for i, u in enumerate(users)
+            for i, u in enumerate(sorted_users)
         ],
         "hidden": display_state["hidden"]
     }

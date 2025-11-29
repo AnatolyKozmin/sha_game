@@ -1,5 +1,6 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, BigInteger, Text, ForeignKey, Boolean
+from sqlalchemy import Integer, String, BigInteger, Text, ForeignKey, Boolean, DateTime
+from datetime import datetime
 
 
 class Base(DeclarativeBase):
@@ -19,6 +20,9 @@ class User(Base):
     
     # Баллы участника (за выполнение своих индивидуальных заданий)
     score: Mapped[int] = mapped_column(Integer, default=0)
+    
+    # Время достижения максимума (личные 10 + команда 21)
+    max_reached_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     
     # Позиция на листе Google Sheets (0-11)
     sheet_index: Mapped[int] = mapped_column(Integer, default=0)
