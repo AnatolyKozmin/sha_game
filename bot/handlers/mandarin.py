@@ -221,6 +221,11 @@ async def callback_toggle_user_task(callback: CallbackQuery, session: AsyncSessi
     
     # Обновляем баллы (только личные, командные не трогаем)
     if task.is_completed:
+        if user.score >= MAX_PERSONAL_SCORE:
+            await callback.answer("⚠️ Участник уже набрал максимум (10 баллов)!", show_alert=True)
+            task.is_completed = False  # Откатываем
+            return
+        
         user.score += 1
         await callback.answer("✅ Задание выполнено! +1 балл участнику")
         
@@ -229,6 +234,11 @@ async def callback_toggle_user_task(callback: CallbackQuery, session: AsyncSessi
             user.max_reached_at = datetime.utcnow()
             logger.info(f"User {user.id} reached max personal score at {user.max_reached_at}")
     else:
+        if user.score <= 0:
+            await callback.answer("⚠️ Баллы не могут быть меньше 0!", show_alert=True)
+            task.is_completed = True  # Откатываем
+            return
+        
         user.score -= 1
         # Сбрасываем время если упали ниже максимума
         if user.score < MAX_PERSONAL_SCORE:
